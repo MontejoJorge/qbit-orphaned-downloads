@@ -17,6 +17,10 @@ async function main() {
   const notOrphans = new Set();
 
   const filteredTorrents = res.torrents.filter(torrent => {
+    if (torrent.tags.includes(ORPHAN_TAG)) {
+      notOrphans.add(torrent.id);
+      return false;
+    }
     const label = torrent.label?.trim();
     const includeCheck = INCLUDE_CATEGORY.length === 0 || INCLUDE_CATEGORY.includes(label);
     const omitCheck = !OMIT_CATEGORY.includes(label);
