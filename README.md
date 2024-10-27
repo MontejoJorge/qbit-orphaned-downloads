@@ -16,7 +16,7 @@ Usage
 
 Docker run:
 ```
-docker run -e INCLUDE_CATEGORY=movies,tv -e OMIT_CATEGORY=books -e ORPHAN_TAG=orphan -e QBIT_HOST=http://localhost:8080 -e QBIT_USERNAME=admin -e QBIT_PASSWORD=adminadmin -e INTERVAL_HOURS=6 -v /mnt/media:/media:ro ghcr.io/MontejoJorge/qbit-orphaned-dowloads:latest
+docker run -e INCLUDE_CATEGORY=movies,tv -e OMIT_CATEGORY=books -e ORPHAN_TAG=orphan -e QBIT_HOST=http://localhost:8080 -e QBIT_USERNAME=admin -e QBIT_PASSWORD=adminadmin -e INTERVAL_HOURS=6 -v /mnt/media:/media:ro ghcr.io/montejojorge/qbit-orphaned-downloads:latest
 ```
 
 Docker Compose:
@@ -24,7 +24,7 @@ Docker Compose:
 version: '3.8'
 services:
   qbit-orphaned-downloads:
-    image: ghcr.io/MontejoJorge/qbit-orphaned-dowloads:latest
+    image: ghcr.io/montejojorge/qbit-orphaned-downloads:latest
     environment:
       - INCLUDE_CATEGORY=movies,tv
       - OMIT_CATEGORY=books
