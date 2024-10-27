@@ -1,0 +1,15 @@
+{
+  "name": "qbit-manage-node",
+  "version": "1.0.0",
+  "type": "module",
+  "author": "MontejoJorge",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "keywords": [],
+  "license": "ISC",
+  "dependencies": {
+    "@ctrl/qbittorrent": "^9.0.1"
+  }
+}

@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  qbit-orphaned-downloads:
+    image: qbit-orphaned-dowloads:beta
+    environment:
+      - INCLUDE_CATEGORY=movies,tv #Comma separated values
+      - OMIT_CATEGORY=books #Comma separated values
+      - ORPHAN_TAG=orphan #Tagname to add
+      - QBIT_HOST=http://localhost:8080 #Default http://localhost:8080
+      - QBIT_USERNAME=admin #Default admin
+      - QBIT_PASSWORD=adminadmin #Default adminadmin
+      - INTERVAL_HOURS=6 #Default 6
+    volumes:
+      - /mnt/media:/media:ro
