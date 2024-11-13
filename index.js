@@ -12,51 +12,65 @@ const client = new QBittorrent({
   password: process.env.QBIT_PASSWORD || "adminadmin",
 });
 
+
+async function checkIfOrphan(torrent) {
+  const files = await client.torrentFiles(torrent.id);
+  for (const file of files) {
+    if (file.priority === 0 && file.progress < 1) continue;
+    const fullPath = path.join(torrent.savePath, file.name);
+    try {
+      const stats = await fs.stat(fullPath);
+      if (stats.nlink > 1) return false;
+    } catch (err) {
+      console.error("Error getting file stat:", err);
+    }
+  }
+  return true;
+}
+
+function filterTorrentByCategory(torrent) {
+  const label = torrent.label?.trim();
+  const includeCheck = INCLUDE_CATEGORY.length === 0 || INCLUDE_CATEGORY.includes(label);
+  const omitCheck = !OMIT_CATEGORY.includes(label);
+  return includeCheck && omitCheck;
+}
+
 async function main() {
   const res = await client.getAllData();
+  const orphans = new Set();
   const notOrphans = new Set();
 
-  const filteredTorrents = res.torrents.filter(torrent => {
-    if (torrent.tags.includes(ORPHAN_TAG)) {
+  for (const torrent of res.torrents) {
+    if (!filterTorrentByCategory(torrent)) continue;
+
+    const isOrphan = await checkIfOrphan(torrent);
+    const hasOrphanTag = torrent.tags.includes(ORPHAN_TAG);
+
+    if (isOrphan) {
+      if (torrent.tags.includes(ORPHAN_TAG)) continue;
+      orphans.add(torrent.id);
+    } else {
       notOrphans.add(torrent.id);
-      return false;
-    }
-    const label = torrent.label?.trim();
-    const includeCheck = INCLUDE_CATEGORY.length === 0 || INCLUDE_CATEGORY.includes(label);
-    const omitCheck = !OMIT_CATEGORY.includes(label);
-    return includeCheck && omitCheck;
-  });
-
-  for (const torrent of filteredTorrents) {
-    const files = await client.torrentFiles(torrent.id);
-
-    for (const file of files) {
-      if (file.priority === 0 && file.progress < 1) continue;
-      const fullPath = path.join(torrent.savePath, file.name);
-
-      try {
-        const stats = await fs.stat(fullPath);
-
-        if (stats.nlink > 1) {
-          notOrphans.add(torrent.id);
-        }
-      } catch (err) {
-        console.error("Error geting file stat:", err);
-      }
     }
   }
 
-  const orphans = filteredTorrents.filter(torrent => !notOrphans.has(torrent.id));
+  await client.addTorrentTags([...orphans], ORPHAN_TAG);
 
-  if (orphans.length === 0) {
-    console.log("No orphans found");
-    return;
+  if (orphans.size > 0) {
+    console.log("Adding orphan tag to", orphans.size, "torrents");
   } else {
-    console.log("Adding orphan tag to ", orphans.length, " torrents");
+    console.log("No new orphans found");
+  }
+
+  const torrentsToRemoveOrphanTag = [...notOrphans].filter(id => res.torrents.find(t => t.id === id).tags.includes(ORPHAN_TAG));
   
-    await client.addTorrentTags(orphans.map(t => t.id), ORPHAN_TAG);
+  await client.removeTorrentTags(torrentsToRemoveOrphanTag, ORPHAN_TAG);
+
+  if (torrentsToRemoveOrphanTag.length > 0) {
+    console.log("Removing orphan tag from", torrentsToRemoveOrphanTag.length, "torrents");
+  } else {
+    console.log("No orphan tags to remove");
   }
 }
 
-main()
-  .catch(err => console.error(err));
+main().catch(err => console.error(err));
