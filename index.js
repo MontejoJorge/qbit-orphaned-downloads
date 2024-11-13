@@ -4,6 +4,7 @@ import { QBittorrent } from "@ctrl/qbittorrent";
 
 const INCLUDE_CATEGORY = process.env.INCLUDE_CATEGORY?.split(",").map(s => s.trim()) || [];
 const OMIT_CATEGORY = process.env.OMIT_CATEGORY?.split(",").map(s => s.trim()) || [];
+const OMIT_TAGS = process.env.OMIT_TAGS?.split(",").map(s => s.trim()) || [];
 const ORPHAN_TAG = process.env.ORPHAN_TAG || "orphan";
 
 const client = new QBittorrent({
@@ -11,7 +12,6 @@ const client = new QBittorrent({
   username: process.env.QBIT_USERNAME || "admin",
   password: process.env.QBIT_PASSWORD || "adminadmin",
 });
-
 
 async function checkIfOrphan(torrent) {
   const files = await client.torrentFiles(torrent.id);
@@ -28,11 +28,12 @@ async function checkIfOrphan(torrent) {
   return true;
 }
 
-function filterTorrentByCategory(torrent) {
+function filterTorrentByCategoryAndTags(torrent) {
   const label = torrent.label?.trim();
   const includeCheck = INCLUDE_CATEGORY.length === 0 || INCLUDE_CATEGORY.includes(label);
   const omitCheck = !OMIT_CATEGORY.includes(label);
-  return includeCheck && omitCheck;
+  const omitTagCheck = !OMIT_TAGS.some(tag => torrent.tags.includes(tag));
+  return includeCheck && omitCheck && omitTagCheck;
 }
 
 async function main() {
@@ -41,7 +42,7 @@ async function main() {
   const notOrphans = new Set();
 
   for (const torrent of res.torrents) {
-    if (!filterTorrentByCategory(torrent)) continue;
+    if (!filterTorrentByCategoryAndTags(torrent)) continue;
 
     const isOrphan = await checkIfOrphan(torrent);
     const hasOrphanTag = torrent.tags.includes(ORPHAN_TAG);

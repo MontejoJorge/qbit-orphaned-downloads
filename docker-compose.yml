@@ -5,6 +5,7 @@ services:
     environment:
       - INCLUDE_CATEGORY=movies,tv #Comma separated values
       - OMIT_CATEGORY=books #Comma separated values
+      - OMIT_TAGS= #Tagnames to omit
       - ORPHAN_TAG=orphan #Tagname to add
       - QBIT_HOST=http://localhost:8080 #Default http://localhost:8080
       - QBIT_USERNAME=admin #Default admin
