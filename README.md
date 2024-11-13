@@ -7,8 +7,9 @@ Usage
 ==============================
 ### Enviroment Variables
 - `INCLUDE_CATEGORY=movies,tv` Comma separated values
-- `OMIT_CATEGORY=books` Comma separated values
+- `OMIT_CATEGORY=omitCategory1,omitCategory2` Comma separated values
 - `ORPHAN_TAG=orphan` Tagname to add
+- `OMIT_TAGS=omitTag1,omitTag2` Comma separated values
 - `QBIT_HOST=http://localhost:8080` Default http://localhost:8080
 - `QBIT_USERNAME=admin` Default admin
 - `QBIT_PASSWORD=adminadmin` Default adminadmin
@@ -27,8 +28,9 @@ services:
     image: ghcr.io/montejojorge/qbit-orphaned-downloads:latest
     environment:
       - INCLUDE_CATEGORY=movies,tv
-      - OMIT_CATEGORY=books
+      - OMIT_CATEGORY=omitCategory1,omitCategory2
       - ORPHAN_TAG=orphan
+      - OMIT_TAGS=omitTag1,omitTag2
       - QBIT_HOST=http://localhost:8080
       - QBIT_USERNAME=admin
       - QBIT_PASSWORD=adminadmin
